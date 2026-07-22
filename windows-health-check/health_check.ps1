@@ -1,127 +1,128 @@
 # ============================================================
 #  WINDOWS SYSTEM HEALTH CHECK
 # ------------------------------------------------------------
-#  Script ini mengecek kondisi kesehatan laptop/PC Windows
-#  secara otomatis, lalu membuat laporan HTML yang mudah
-#  dibaca oleh siapa saja (tidak perlu paham teknis).
+#  This script automatically checks the health of your
+#  Windows laptop/PC, then generates a report in HTML format
+#  that's easy for anyone to read (no technical knowledge
+#  needed).
 #
-#  Cara pakai:
-#      1. Klik kanan file ini -> "Run with PowerShell"
-#      atau
-#      2. Buka PowerShell, lalu jalankan:
+#  How to use:
+#      1. Right-click this file -> "Run with PowerShell"
+#      or
+#      2. Open PowerShell, then run:
 #         .\health_check.ps1
 #
-#  Hasil laporan akan tersimpan di folder "reports\"
-#  dan otomatis terbuka di browser.
+#  The report will be saved inside the "reports\" folder
+#  and will automatically open in your browser.
 # ============================================================
 
-# --- Persiapan folder laporan ---
+# --- Prepare the reports folder ---
 $Dir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ReportDir = Join-Path $Dir "reports"
 if (!(Test-Path $ReportDir)) { New-Item -ItemType Directory -Path $ReportDir | Out-Null }
 
-$Tanggal = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
-$TanggalTampil = Get-Date -Format "dd MMMM yyyy, HH:mm"
-$FileLaporan = Join-Path $ReportDir "laporan_$Tanggal.html"
+$DateStamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+$DateDisplay = Get-Date -Format "dd MMMM yyyy, HH:mm"
+$ReportFile = Join-Path $ReportDir "report_$DateStamp.html"
 
 # ============================================================
-# FUNGSI BANTUAN
+# HELPER FUNCTIONS
 # ============================================================
 
-function Tentukan-Status($persen) {
-    if ($persen -lt 70) { return "SEHAT" }
-    elseif ($persen -lt 90) { return "PERHATIAN" }
-    else { return "BERMASALAH" }
+function Get-Status($percent) {
+    if ($percent -lt 70) { return "HEALTHY" }
+    elseif ($percent -lt 90) { return "ATTENTION" }
+    else { return "PROBLEM" }
 }
 
-function Warna-Status($status) {
+function Get-StatusColor($status) {
     switch ($status) {
-        "SEHAT" { return "#2ecc71" }
-        "PERHATIAN" { return "#f1c40f" }
-        "BERMASALAH" { return "#e74c3c" }
+        "HEALTHY" { return "#2ecc71" }
+        "ATTENTION" { return "#f1c40f" }
+        "PROBLEM" { return "#e74c3c" }
     }
 }
 
-function Label-Status($status) {
+function Get-StatusLabel($status) {
     switch ($status) {
-        "SEHAT" { return "&#9989; Sehat" }
-        "PERHATIAN" { return "&#9888;&#65039; Perlu Perhatian" }
-        "BERMASALAH" { return "&#10060; Bermasalah" }
+        "HEALTHY" { return "&#9989; Healthy" }
+        "ATTENTION" { return "&#9888;&#65039; Needs Attention" }
+        "PROBLEM" { return "&#10060; Problem" }
     }
 }
 
 # ============================================================
-# 1. CEK PEMAKAIAN CPU
+# 1. CHECK CPU USAGE
 # ============================================================
 $CpuUsage = [math]::Round((Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average)
-$StatusCpu = Tentukan-Status $CpuUsage
+$StatusCpu = Get-Status $CpuUsage
 
 # ============================================================
-# 2. CEK PEMAKAIAN RAM (MEMORY)
+# 2. CHECK RAM (MEMORY) USAGE
 # ============================================================
 $OS = Get-CimInstance Win32_OperatingSystem
 $RamTotalMB = [math]::Round($OS.TotalVisibleMemorySize / 1024)
 $RamFreeMB  = [math]::Round($OS.FreePhysicalMemory / 1024)
 $RamUsedMB  = $RamTotalMB - $RamFreeMB
-$RamPersen  = [math]::Round(($RamUsedMB / $RamTotalMB) * 100)
-$StatusRam  = Tentukan-Status $RamPersen
+$RamPercent = [math]::Round(($RamUsedMB / $RamTotalMB) * 100)
+$StatusRam  = Get-Status $RamPercent
 
 # ============================================================
-# 3. CEK PEMAKAIAN DISK (Drive C:)
+# 3. CHECK DISK USAGE (Drive C:)
 # ============================================================
 $Disk = Get-PSDrive C
 $DiskTotalGB = [math]::Round(($Disk.Used + $Disk.Free) / 1GB, 1)
 $DiskUsedGB  = [math]::Round($Disk.Used / 1GB, 1)
-$DiskPersen  = [math]::Round(($Disk.Used / ($Disk.Used + $Disk.Free)) * 100)
-$StatusDisk  = Tentukan-Status $DiskPersen
+$DiskPercent = [math]::Round(($Disk.Used / ($Disk.Used + $Disk.Free)) * 100)
+$StatusDisk  = Get-Status $DiskPercent
 
 # ============================================================
-# 4. CEK LAMA KOMPUTER MENYALA (UPTIME)
+# 4. CHECK SYSTEM UPTIME
 # ============================================================
 $BootTime = $OS.LastBootUpTime
 $Uptime = (Get-Date) - $BootTime
-$UptimeText = "{0} hari, {1} jam, {2} menit" -f $Uptime.Days, $Uptime.Hours, $Uptime.Minutes
+$UptimeText = "{0} days, {1} hours, {2} minutes" -f $Uptime.Days, $Uptime.Hours, $Uptime.Minutes
 
 # ============================================================
-# 5. CEK PERCOBAAN LOGIN GAGAL (indikasi keamanan sederhana)
+# 5. CHECK FAILED LOGIN ATTEMPTS (simple security indicator)
 # ============================================================
 try {
-    $LoginGagal = (Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4625} -MaxEvents 500 -ErrorAction Stop).Count
+    $FailedLogins = (Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4625} -MaxEvents 500 -ErrorAction Stop).Count
 } catch {
-    $LoginGagal = $null
+    $FailedLogins = $null
 }
 
-if ($null -ne $LoginGagal) {
-    if ($LoginGagal -eq 0) { $StatusLogin = "SEHAT" }
-    elseif ($LoginGagal -lt 20) { $StatusLogin = "PERHATIAN" }
-    else { $StatusLogin = "BERMASALAH" }
-    $LoginGagalText = "$LoginGagal kali"
+if ($null -ne $FailedLogins) {
+    if ($FailedLogins -eq 0) { $StatusLogin = "HEALTHY" }
+    elseif ($FailedLogins -lt 20) { $StatusLogin = "ATTENTION" }
+    else { $StatusLogin = "PROBLEM" }
+    $FailedLoginsText = "$FailedLogins time(s)"
 } else {
-    $StatusLogin = "PERHATIAN"
-    $LoginGagalText = "Tidak dapat dicek (perlu jalankan sebagai Administrator)"
+    $StatusLogin = "ATTENTION"
+    $FailedLoginsText = "Cannot be checked (needs to run as Administrator)"
 }
 
 # ============================================================
-# KESIMPULAN UMUM
+# OVERALL SUMMARY
 # ============================================================
-$SemuaStatus = @($StatusCpu, $StatusRam, $StatusDisk, $StatusLogin)
-if ($SemuaStatus -contains "BERMASALAH") { $Kesimpulan = "BERMASALAH" }
-elseif ($SemuaStatus -contains "PERHATIAN") { $Kesimpulan = "PERHATIAN" }
-else { $Kesimpulan = "SEHAT" }
+$AllStatuses = @($StatusCpu, $StatusRam, $StatusDisk, $StatusLogin)
+if ($AllStatuses -contains "PROBLEM") { $Summary = "PROBLEM" }
+elseif ($AllStatuses -contains "ATTENTION") { $Summary = "ATTENTION" }
+else { $Summary = "HEALTHY" }
 
 # ============================================================
-# MEMBUAT LAPORAN HTML
+# GENERATE HTML REPORT
 # ============================================================
 $Html = @"
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Laporan Kesehatan Sistem - $TanggalTampil</title>
+<title>System Health Report - $DateDisplay</title>
 <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background:#f4f6f8; margin:0; padding:0; color:#2c3e50; }
     .container { max-width: 750px; margin: 30px auto; background:#fff; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.08); overflow:hidden; }
-    .header { background:$(Warna-Status $Kesimpulan); color:#fff; padding:25px 30px; }
+    .header { background:$(Get-StatusColor $Summary); color:#fff; padding:25px 30px; }
     .header h1 { margin:0; font-size:22px; }
     .header p { margin:5px 0 0; opacity:0.9; }
     .content { padding: 25px 30px; }
@@ -130,70 +131,70 @@ $Html = @"
     th { background:#f9fafb; font-size:14px; color:#555; }
     .badge { padding:4px 10px; border-radius:20px; font-size:13px; font-weight:600; color:#fff; display:inline-block; }
     .footer { padding:15px 30px; font-size:12px; color:#999; background:#fafafa; }
-    .keterangan { font-size:13px; color:#666; margin-top:20px; line-height:1.6; }
+    .notes { font-size:13px; color:#666; margin-top:20px; line-height:1.6; }
 </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>Laporan Kesehatan Sistem (Windows)</h1>
-        <p>Dibuat pada: $TanggalTampil</p>
-        <p>Status Keseluruhan: $(Label-Status $Kesimpulan)</p>
+        <h1>System Health Report (Windows)</h1>
+        <p>Generated on: $DateDisplay</p>
+        <p>Overall Status: $(Get-StatusLabel $Summary)</p>
     </div>
     <div class="content">
         <table>
-            <tr><th>Komponen</th><th>Detail</th><th>Status</th></tr>
+            <tr><th>Component</th><th>Details</th><th>Status</th></tr>
             <tr>
-                <td>Penggunaan Processor (CPU)</td>
-                <td>${CpuUsage}% terpakai</td>
-                <td><span class="badge" style="background:$(Warna-Status $StatusCpu)">$(Label-Status $StatusCpu)</span></td>
+                <td>Processor Usage (CPU)</td>
+                <td>${CpuUsage}% used</td>
+                <td><span class="badge" style="background:$(Get-StatusColor $StatusCpu)">$(Get-StatusLabel $StatusCpu)</span></td>
             </tr>
             <tr>
-                <td>Penggunaan Memori (RAM)</td>
-                <td>$RamUsedMB MB dari $RamTotalMB MB (${RamPersen}%)</td>
-                <td><span class="badge" style="background:$(Warna-Status $StatusRam)">$(Label-Status $StatusRam)</span></td>
+                <td>Memory Usage (RAM)</td>
+                <td>$RamUsedMB MB of $RamTotalMB MB (${RamPercent}%)</td>
+                <td><span class="badge" style="background:$(Get-StatusColor $StatusRam)">$(Get-StatusLabel $StatusRam)</span></td>
             </tr>
             <tr>
-                <td>Penggunaan Penyimpanan (Drive C:)</td>
-                <td>$DiskUsedGB GB dari $DiskTotalGB GB (${DiskPersen}%)</td>
-                <td><span class="badge" style="background:$(Warna-Status $StatusDisk)">$(Label-Status $StatusDisk)</span></td>
+                <td>Storage Usage (Drive C:)</td>
+                <td>$DiskUsedGB GB of $DiskTotalGB GB (${DiskPercent}%)</td>
+                <td><span class="badge" style="background:$(Get-StatusColor $StatusDisk)">$(Get-StatusLabel $StatusDisk)</span></td>
             </tr>
             <tr>
-                <td>Lama Sistem Menyala</td>
+                <td>System Uptime</td>
                 <td>$UptimeText</td>
                 <td>&mdash;</td>
             </tr>
             <tr>
-                <td>Percobaan Login Gagal</td>
-                <td>$LoginGagalText</td>
-                <td><span class="badge" style="background:$(Warna-Status $StatusLogin)">$(Label-Status $StatusLogin)</span></td>
+                <td>Failed Login Attempts</td>
+                <td>$FailedLoginsText</td>
+                <td><span class="badge" style="background:$(Get-StatusColor $StatusLogin)">$(Get-StatusLabel $StatusLogin)</span></td>
             </tr>
         </table>
 
-        <div class="keterangan">
-            <b>Keterangan:</b><br>
-            &#9989; <b>Sehat</b> = Semua berjalan normal, tidak perlu tindakan.<br>
-            &#9888;&#65039; <b>Perlu Perhatian</b> = Sebaiknya mulai dipantau, belum darurat.<br>
-            &#10060; <b>Bermasalah</b> = Perlu tindakan / dihubungi tim IT sesegera mungkin.
+        <div class="notes">
+            <b>Legend:</b><br>
+            &#9989; <b>Healthy</b> = Everything is normal, no action needed.<br>
+            &#9888;&#65039; <b>Needs Attention</b> = Should start being monitored, not urgent yet.<br>
+            &#10060; <b>Problem</b> = Action needed / contact IT team as soon as possible.
         </div>
     </div>
     <div class="footer">
-        Laporan dibuat otomatis oleh Windows System Health Check &mdash; tidak memerlukan tindakan manual.
+        Report generated automatically by Windows System Health Check &mdash; no manual action required.
     </div>
 </div>
 </body>
 </html>
 "@
 
-$Html | Out-File -FilePath $FileLaporan -Encoding utf8
+$Html | Out-File -FilePath $ReportFile -Encoding utf8
 
 Write-Host ""
 Write-Host "=========================================="
-Write-Host " Pengecekan selesai!"
-Write-Host " Status keseluruhan sistem: $Kesimpulan"
-Write-Host " Laporan tersimpan di: $FileLaporan"
+Write-Host " Check complete!"
+Write-Host " Overall system status: $Summary"
+Write-Host " Report saved to: $ReportFile"
 Write-Host "=========================================="
 Write-Host ""
 
-# Otomatis buka laporan di browser default
-Start-Process $FileLaporan
+# Automatically open the report in the default browser
+Start-Process $ReportFile
