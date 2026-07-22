@@ -26,8 +26,8 @@ The report shows status using simple colors and emojis:
 
 ### 1. Download / Clone this project
 ```bash
-git clone https://github.com/andriyank/linux-health-check.git
-cd linux-health-check
+git clone https://github.com/andriyank/Automation.git
+cd Automation/linux-health-check
 ```
 
 ### 2. Run it once
