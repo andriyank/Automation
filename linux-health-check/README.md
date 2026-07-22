@@ -12,6 +12,12 @@ The report shows status using simple colors and emojis:
 
 ---
 
+## 📸 Example Report
+
+![Linux System Health Report](images/linux-system-health-report.png)
+
+---
+
 ## 📋 What Gets Checked?
 
 1. **Processor Usage (CPU)** — whether the computer is under heavy load
@@ -24,30 +30,29 @@ The report shows status using simple colors and emojis:
 
 ## 🚀 How to Use
 
-Don't use Git? Download without it
+### Don't use Git? Download without it
 
 No terminal or Git knowledge needed:
 
 1. Go to the [repo page](https://github.com/andriyank/Automation)
 2. Click the green **`< > Code`** button → **"Download ZIP"**
-3. Extract the ZIP, then open the linux-health-check folder
+3. Extract the ZIP, then open the `linux-health-check` folder
 
-To download just this folder (not the whole repo), go to https://download-directory.github.io, paste this link: https://github.com/andriyank/Automation/tree/main/linux-health-check, then press Enter.
+> To download just this folder (not the whole repo), go to **[download-directory.github.io](https://download-directory.github.io)**, paste this link: https://github.com/andriyank/Automation/tree/main/linux-health-check, then press Enter.
 
 ### 1. Download / Clone this project
 ```bash
 git clone https://github.com/andriyank/Automation.git
-cd Automation
-cd linux-health-check
+cd Automation/linux-health-check
 ```
-⚠️ Note: Run each command one line at a time — press Enter after each line. Don't paste them all at once into a single line, as this can cause errors.
+> ⚠️ **Note:** Run each command one line at a time — press Enter after each line. Don't paste them all at once into a single line, as this can cause errors.
 
 ### 2. Run it once
 ```bash
 bash health_check.sh
 ```
 
-The report will be automatically created inside the `reports/` folder, named after the current date and time. Example: `reports/laporan_2026-07-22_07-36-24.html`
+The report will be automatically created inside the `reports/` folder, named after the current date and time. Example: `reports/report_2026-07-22_07-36-24.html`
 
 ### 3. Open the report
 Just **double-click the `.html` file** inside the `reports/` folder — it will open in your browser (Chrome/Firefox) like a normal web page. No terminal or commands needed to read it.
@@ -72,8 +77,9 @@ This will schedule `health_check.sh` to run by itself every day at 08:00 AM.
 linux-health-check/
 ├── health_check.sh      # Main health check script
 ├── setup_otomatis.sh    # Schedules the daily automatic check
-├── reports/              # Where all HTML reports are stored
-└── README.md             # This file
+├── images/                # Example screenshots used in this README
+├── reports/               # Where all HTML reports are stored
+└── README.md              # This file
 ```
 
 ---
