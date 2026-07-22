@@ -24,6 +24,16 @@ The report is a web page (HTML) that's easy for anyone to read, including non-te
 
 ## 🚀 How to Use
 
+Don't use Git? Download without it
+
+No terminal or Git knowledge needed:
+
+Go to the repo page
+Click the green < > Code button → "Download ZIP"
+Extract the ZIP, then open the windows-health-check folder
+
+To download just this folder (not the whole repo), go to download-directory.github.io, paste this link: https://github.com/andriyank/Automation/tree/main/windows-health-check, then press Enter.
+
 ### 1. Open the `windows-health-check` folder
 
 ### 2. Right-click `health_check.ps1` → **Run with PowerShell**
