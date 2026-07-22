@@ -1,35 +1,35 @@
 #!/bin/bash
 #
 # ============================================================
-#  SETUP OTOMATIS - Linux System Health Check
+#  AUTOMATED SETUP - Linux System Health Check
 # ------------------------------------------------------------
-#  Script ini akan menjadwalkan "health_check.sh" agar berjalan
-#  SENDIRI setiap hari jam 08:00 pagi, tanpa perlu dijalankan
-#  manual setiap hari.
+#  This script schedules "health_check.sh" to run
+#  AUTOMATICALLY every day at 08:00 AM, so you don't need
+#  to run it manually every day.
 #
-#  Cara pakai:
+#  How to use:
 #      bash setup_otomatis.sh
 # ============================================================
 
-# Cari lokasi folder project ini secara otomatis
+# Automatically find the location of this project folder
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT="$DIR/health_check.sh"
-LOG="$DIR/reports/log_otomatis.txt"
+LOG="$DIR/reports/automation_log.txt"
 
 if [ ! -f "$SCRIPT" ]; then
-    echo "❌ File health_check.sh tidak ditemukan di folder ini."
+    echo "❌ health_check.sh not found in this folder."
     exit 1
 fi
 
-# Baris perintah yang akan dijadwalkan (setiap hari jam 08:00)
-BARIS_CRON="0 8 * * * cd $DIR && bash $SCRIPT >> $LOG 2>&1"
+# The line to be scheduled (every day at 08:00 AM)
+CRON_LINE="0 8 * * * cd $DIR && bash $SCRIPT >> $LOG 2>&1"
 
-# Cek apakah baris ini sudah pernah ditambahkan sebelumnya, agar tidak dobel
+# Check if this line already exists, to avoid duplicates
 if crontab -l 2>/dev/null | grep -qF "$SCRIPT"; then
-    echo "ℹ️  Penjadwalan otomatis sudah ada sebelumnya. Tidak ada perubahan."
+    echo "ℹ️  Automated scheduling already exists. No changes made."
 else
-    ( crontab -l 2>/dev/null; echo "$BARIS_CRON" ) | crontab -
-    echo "✅ Berhasil! Mulai sekarang, pengecekan akan berjalan otomatis"
-    echo "   setiap hari jam 08:00 pagi."
-    echo "   Laporan akan muncul di folder: $DIR/reports/"
+    ( crontab -l 2>/dev/null; echo "$CRON_LINE" ) | crontab -
+    echo "✅ Success! From now on, the check will run automatically"
+    echo "   every day at 08:00 AM."
+    echo "   Reports will appear in: $DIR/reports/"
 fi
