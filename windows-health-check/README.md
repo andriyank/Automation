@@ -24,15 +24,19 @@ The report is a web page (HTML) that's easy for anyone to read, including non-te
 
 ## 🚀 How to Use
 
-Don't use Git? Download without it
+### Don't use Git? Download without it
 
 No terminal or Git knowledge needed:
 
-Go to the repo page
-Click the green < > Code button → "Download ZIP"
-Extract the ZIP, then open the windows-health-check folder
+1. Go to the [repo page](https://github.com/andriyank/Automation)
+2. Click the green **`< > Code`** button → **"Download ZIP"**
+3. Extract the ZIP, then open the `windows-health-check` folder
 
-To download just this folder (not the whole repo), go to https://download-directory.github.io, paste this link: https://github.com/andriyank/Automation/tree/main/windows-health-check, then press Enter.
+> To download just this folder (not the whole repo), go to **[download-directory.github.io](https://download-directory.github.io)**, paste this link: `https://github.com/andriyank/Automation/tree/main/windows-health-check`, then press Enter.
+
+### 1. Open the `windows-health-check` folder
+
+If you downloaded the ZIP, extract it first, then open the `windows-health-check` folder.
 
 ### 2. Run the script
 
@@ -64,6 +68,7 @@ powershell -ExecutionPolicy Bypass -File .\health_check.ps1
 This temporarily allows the script to run just for this one execution, without permanently changing any settings on your system.
 
 ### 3. Result
+
 The report will automatically **open in your browser**, and will also be saved inside the `reports\` folder.
 
 ---
