@@ -18,7 +18,7 @@ No terminal knowledge required to read the results — the report simply **opens
  
 | Linux | Windows |
 |---|---|
-| <img src="linux-health-check/images/linux-system-health-report.png" width="450" height="550" style="object-fit:cover;"> | <img src="windows-health-check/images/windows-system-health-report.png" width="450" height="550" style="object-fit:cover;"> |
+| <img src="linux-health-check/images/linux-system-health-report.png" width="450" > | <img src="windows-health-check/images/windows-system-health-report.png" width="450"> |
  
 ---
 ## 📂 What's in This Repo
