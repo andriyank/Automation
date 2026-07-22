@@ -27,8 +27,10 @@ The report shows status using simple colors and emojis:
 ### 1. Download / Clone this project
 ```bash
 git clone https://github.com/andriyank/Automation.git
-cd Automation/linux-health-check
+cd Automation
+cd linux-health-check
 ```
+⚠️ Note: Run each command one line at a time — press Enter after each line. Don't paste them all at once into a single line, as this can cause errors.
 
 ### 2. Run it once
 ```bash
