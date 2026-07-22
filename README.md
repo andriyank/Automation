@@ -42,6 +42,17 @@ Both versions check the same things, just read differently depending on Linux vs
 
 ## 🚀 Quick Start
 
+Don't use Git? Download without it
+
+No terminal or Git knowledge needed:
+
+Go to the top of this repo page
+Click the green < > Code button
+Select "Download ZIP"
+Extract the ZIP file, then open the linux-health-check or windows-health-check folder
+
+Using Git instead?
+
 ### For Linux / Kali Linux
 ```bash
 cd linux-health-check
