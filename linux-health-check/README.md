@@ -28,9 +28,9 @@ Don't use Git? Download without it
 
 No terminal or Git knowledge needed:
 
-Go to the repo page
-Click the green < > Code button → "Download ZIP"
-Extract the ZIP, then open the linux-health-check folder
+1. Go to the [repo page](https://github.com/andriyank/Automation)
+2. Click the green **`< > Code`** button → **"Download ZIP"**
+3. Extract the ZIP, then open the linux-health-check folder
 
 To download just this folder (not the whole repo), go to https://download-directory.github.io, paste this link: https://github.com/andriyank/Automation/tree/main/linux-health-check, then press Enter.
 
