@@ -34,9 +34,16 @@ Extract the ZIP, then open the windows-health-check folder
 
 To download just this folder (not the whole repo), go to https://download-directory.github.io, paste this link: https://github.com/andriyank/Automation/tree/main/windows-health-check, then press Enter.
 
-### 1. Open the `windows-health-check` folder
+### 2. Run the script
 
-### 2. Right-click `health_check.ps1` → **Run with PowerShell**
+**Option A — Right-click:**
+Right-click `health_check.ps1` → **Run with PowerShell**
+
+**Option B — Via terminal:**
+Open PowerShell inside the `windows-health-check` folder, then run:
+```powershell
+.\health_check.ps1
+```
 
 > If you see an error like *"cannot be loaded because running scripts is disabled..."*, that's because Windows blocks PowerShell scripts by default (for security). To fix it:
 >
@@ -46,7 +53,7 @@ To download just this folder (not the whole repo), go to https://download-direct
 >    Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 >    ```
 > 3. Type `Y` and press Enter
-> 4. Try running `health_check.ps1` again
+> 4. Try running `.\health_check.ps1` again
 
 ### Alternative: Run Without Changing System Settings
 
