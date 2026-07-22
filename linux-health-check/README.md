@@ -24,6 +24,16 @@ The report shows status using simple colors and emojis:
 
 ## 🚀 How to Use
 
+Don't use Git? Download without it
+
+No terminal or Git knowledge needed:
+
+Go to the repo page
+Click the green < > Code button → "Download ZIP"
+Extract the ZIP, then open the linux-health-check folder
+
+To download just this folder (not the whole repo), go to download-directory.github.io, paste this link: https://github.com/andriyank/Automation/tree/main/linux-health-check, then press Enter.
+
 ### 1. Download / Clone this project
 ```bash
 git clone https://github.com/andriyank/Automation.git
