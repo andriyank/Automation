@@ -1,12 +1,12 @@
 # ============================================================
-#  SETUP OTOMATIS - Windows System Health Check
+#  AUTOMATED SETUP - Windows System Health Check
 # ------------------------------------------------------------
-#  Script ini akan menjadwalkan "health_check.ps1" agar berjalan
-#  SENDIRI setiap hari jam 08:00 pagi, tanpa perlu dijalankan
-#  manual setiap hari.
+#  This script schedules "health_check.ps1" to run
+#  AUTOMATICALLY every day at 08:00 AM, so you don't need
+#  to run it manually every day.
 #
-#  PENTING: Jalankan file ini dengan klik kanan -> 
-#           "Run with PowerShell as Administrator"
+#  IMPORTANT: Run this file by right-clicking it ->
+#             "Run with PowerShell as Administrator"
 # ============================================================
 
 $Dir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -14,7 +14,7 @@ $ScriptPath = Join-Path $Dir "health_check.ps1"
 $TaskName = "LinuxLabHealthCheck"
 
 if (!(Test-Path $ScriptPath)) {
-    Write-Host "Gagal: file health_check.ps1 tidak ditemukan di folder ini." -ForegroundColor Red
+    Write-Host "Failed: health_check.ps1 not found in this folder." -ForegroundColor Red
     exit
 }
 
@@ -23,9 +23,9 @@ $Trigger = New-ScheduledTaskTrigger -Daily -At 8:00AM
 
 $Existing = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
 if ($Existing) {
-    Write-Host "Penjadwalan otomatis sudah ada sebelumnya. Tidak ada perubahan." -ForegroundColor Yellow
+    Write-Host "Automated scheduling already exists. No changes made." -ForegroundColor Yellow
 } else {
-    Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Description "Cek kesehatan sistem harian" | Out-Null
-    Write-Host "Berhasil! Mulai sekarang, pengecekan akan berjalan otomatis setiap hari jam 08:00 pagi." -ForegroundColor Green
-    Write-Host "Laporan akan muncul di folder: $Dir\reports\"
+    Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Description "Daily system health check" | Out-Null
+    Write-Host "Success! From now on, the check will run automatically every day at 08:00 AM." -ForegroundColor Green
+    Write-Host "Reports will appear in: $Dir\reports\"
 }
