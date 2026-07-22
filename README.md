@@ -14,6 +14,13 @@ No terminal knowledge required to read the results — the report simply **opens
 
 ---
 
+## 📸 Preview
+ 
+| Linux | Windows |
+|---|---|
+| ![Linux Report](linux-health-check/images/linux-system-health-report.png) | ![Windows Report](windows-health-check/images/windows-system-health-report.png) |
+ 
+---
 ## 📂 What's in This Repo
 
 | Folder | For System | Script Language | Description |
