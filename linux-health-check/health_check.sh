@@ -3,139 +3,139 @@
 # ============================================================
 #  LINUX SYSTEM HEALTH CHECK
 # ------------------------------------------------------------
-#  Script ini mengecek kondisi kesehatan komputer/server Linux
-#  secara otomatis, lalu membuat laporan dalam format HTML
-#  yang mudah dibaca oleh siapa saja (tidak perlu paham Linux).
+#  This script automatically checks the health of your Linux
+#  computer/server, then generates a report in HTML format
+#  that's easy for anyone to read (no Linux knowledge needed).
 #
-#  Cara pakai:
+#  How to use:
 #      bash health_check.sh
 #
-#  Hasil laporan akan tersimpan di folder "reports/"
-#  dengan nama sesuai tanggal & jam.
+#  The report will be saved inside the "reports/" folder,
+#  named after the current date and time.
 # ============================================================
 
-# --- Persiapan folder laporan ---
+# --- Prepare the reports folder ---
 REPORT_DIR="reports"
 mkdir -p "$REPORT_DIR"
 
-TANGGAL=$(date +"%Y-%m-%d_%H-%M-%S")
-TANGGAL_TAMPIL=$(date +"%d %B %Y, %H:%M")
-FILE_LAPORAN="$REPORT_DIR/laporan_$TANGGAL.html"
+DATE_STAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+DATE_DISPLAY=$(date +"%d %B %Y, %H:%M")
+REPORT_FILE="$REPORT_DIR/report_$DATE_STAMP.html"
 
 # ============================================================
-# FUNGSI BANTUAN
+# HELPER FUNCTIONS
 # ============================================================
 
-# Fungsi untuk menentukan status berdasarkan persentase pemakaian
-# < 70%  = Sehat (hijau)
-# 70-90% = Perlu Perhatian (kuning)
-# > 90%  = Bermasalah (merah)
-tentukan_status() {
-    local persen=$1
-    if (( persen < 70 )); then
-        echo "SEHAT"
-    elif (( persen < 90 )); then
-        echo "PERHATIAN"
+# Determines status based on usage percentage
+# < 70%  = Healthy (green)
+# 70-90% = Needs Attention (yellow)
+# > 90%  = Problem (red)
+determine_status() {
+    local percent=$1
+    if (( percent < 70 )); then
+        echo "HEALTHY"
+    elif (( percent < 90 )); then
+        echo "ATTENTION"
     else
-        echo "BERMASALAH"
+        echo "PROBLEM"
     fi
 }
 
-warna_status() {
+status_color() {
     case "$1" in
-        SEHAT) echo "#2ecc71" ;;      # hijau
-        PERHATIAN) echo "#f1c40f" ;;  # kuning
-        BERMASALAH) echo "#e74c3c" ;; # merah
+        HEALTHY) echo "#2ecc71" ;;   # green
+        ATTENTION) echo "#f1c40f" ;; # yellow
+        PROBLEM) echo "#e74c3c" ;;   # red
     esac
 }
 
-label_status() {
+status_label() {
     case "$1" in
-        SEHAT) echo "✅ Sehat" ;;
-        PERHATIAN) echo "⚠️ Perlu Perhatian" ;;
-        BERMASALAH) echo "❌ Bermasalah" ;;
+        HEALTHY) echo "✅ Healthy" ;;
+        ATTENTION) echo "⚠️ Needs Attention" ;;
+        PROBLEM) echo "❌ Problem" ;;
     esac
 }
 
 # ============================================================
-# 1. CEK PEMAKAIAN CPU
+# 1. CHECK CPU USAGE
 # ============================================================
 CPU_IDLE=$(top -bn1 | grep "Cpu(s)" | awk -F',' '{print $4}' | grep -o '[0-9.]*')
 CPU_USAGE=$(printf "%.0f" "$(echo "100 - $CPU_IDLE" | bc 2>/dev/null || echo 0)")
 [ -z "$CPU_USAGE" ] && CPU_USAGE=0
-STATUS_CPU=$(tentukan_status "$CPU_USAGE")
+STATUS_CPU=$(determine_status "$CPU_USAGE")
 
 # ============================================================
-# 2. CEK PEMAKAIAN RAM (MEMORY)
+# 2. CHECK RAM (MEMORY) USAGE
 # ============================================================
 RAM_INFO=$(free -m | awk '/Mem:/ {printf "%d %d %.0f", $3, $2, ($3/$2)*100}')
 RAM_USED=$(echo "$RAM_INFO" | awk '{print $1}')
 RAM_TOTAL=$(echo "$RAM_INFO" | awk '{print $2}')
-RAM_PERSEN=$(echo "$RAM_INFO" | awk '{print $3}')
-STATUS_RAM=$(tentukan_status "$RAM_PERSEN")
+RAM_PERCENT=$(echo "$RAM_INFO" | awk '{print $3}')
+STATUS_RAM=$(determine_status "$RAM_PERCENT")
 
 # ============================================================
-# 3. CEK PEMAKAIAN DISK (HARDISK / STORAGE)
+# 3. CHECK DISK (STORAGE) USAGE
 # ============================================================
 DISK_INFO=$(df -h / | awk 'NR==2 {print $3, $2, $5}' | tr -d '%')
 DISK_USED=$(echo "$DISK_INFO" | awk '{print $1}')
 DISK_TOTAL=$(echo "$DISK_INFO" | awk '{print $2}')
-DISK_PERSEN=$(echo "$DISK_INFO" | awk '{print $3}')
-STATUS_DISK=$(tentukan_status "$DISK_PERSEN")
+DISK_PERCENT=$(echo "$DISK_INFO" | awk '{print $3}')
+STATUS_DISK=$(determine_status "$DISK_PERCENT")
 
 # ============================================================
-# 4. CEK LAMA KOMPUTER MENYALA (UPTIME)
+# 4. CHECK SYSTEM UPTIME
 # ============================================================
 UPTIME_TEXT=$(uptime -p 2>/dev/null | sed 's/up //')
 [ -z "$UPTIME_TEXT" ] && UPTIME_TEXT=$(uptime)
 
 # ============================================================
-# 5. CEK PERCOBAAN LOGIN GAGAL (indikasi keamanan sederhana)
+# 5. CHECK FAILED LOGIN ATTEMPTS (simple security indicator)
 # ============================================================
 if [ -f /var/log/auth.log ]; then
-    LOGIN_GAGAL=$(grep -c "Failed password" /var/log/auth.log 2>/dev/null)
+    FAILED_LOGINS=$(grep -c "Failed password" /var/log/auth.log 2>/dev/null)
 else
-    LOGIN_GAGAL="Tidak dapat dicek (log tidak ditemukan)"
+    FAILED_LOGINS="Cannot be checked (log not found)"
 fi
 
-if [[ "$LOGIN_GAGAL" =~ ^[0-9]+$ ]]; then
-    if (( LOGIN_GAGAL == 0 )); then
-        STATUS_LOGIN="SEHAT"
-    elif (( LOGIN_GAGAL < 20 )); then
-        STATUS_LOGIN="PERHATIAN"
+if [[ "$FAILED_LOGINS" =~ ^[0-9]+$ ]]; then
+    if (( FAILED_LOGINS == 0 )); then
+        STATUS_LOGIN="HEALTHY"
+    elif (( FAILED_LOGINS < 20 )); then
+        STATUS_LOGIN="ATTENTION"
     else
-        STATUS_LOGIN="BERMASALAH"
+        STATUS_LOGIN="PROBLEM"
     fi
 else
-    STATUS_LOGIN="PERHATIAN"
+    STATUS_LOGIN="ATTENTION"
 fi
 
 # ============================================================
-# KESIMPULAN UMUM (status paling buruk yang menentukan)
+# OVERALL SUMMARY (worst status determines the final verdict)
 # ============================================================
-KESIMPULAN="SEHAT"
+SUMMARY="HEALTHY"
 for s in "$STATUS_CPU" "$STATUS_RAM" "$STATUS_DISK" "$STATUS_LOGIN"; do
-    if [ "$s" == "BERMASALAH" ]; then
-        KESIMPULAN="BERMASALAH"
+    if [ "$s" == "PROBLEM" ]; then
+        SUMMARY="PROBLEM"
         break
-    elif [ "$s" == "PERHATIAN" ] && [ "$KESIMPULAN" != "BERMASALAH" ]; then
-        KESIMPULAN="PERHATIAN"
+    elif [ "$s" == "ATTENTION" ] && [ "$SUMMARY" != "PROBLEM" ]; then
+        SUMMARY="ATTENTION"
     fi
 done
 
 # ============================================================
-# MEMBUAT LAPORAN HTML
+# GENERATE HTML REPORT
 # ============================================================
-cat > "$FILE_LAPORAN" << EOF
+cat > "$REPORT_FILE" << EOF
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Laporan Kesehatan Sistem - $TANGGAL_TAMPIL</title>
+<title>System Health Report - $DATE_DISPLAY</title>
 <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background:#f4f6f8; margin:0; padding:0; color:#2c3e50; }
     .container { max-width: 750px; margin: 30px auto; background:#fff; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.08); overflow:hidden; }
-    .header { background:$(warna_status "$KESIMPULAN"); color:#fff; padding:25px 30px; }
+    .header { background:$(status_color "$SUMMARY"); color:#fff; padding:25px 30px; }
     .header h1 { margin:0; font-size:22px; }
     .header p { margin:5px 0 0; opacity:0.9; }
     .content { padding: 25px 30px; }
@@ -144,55 +144,55 @@ cat > "$FILE_LAPORAN" << EOF
     th { background:#f9fafb; font-size:14px; color:#555; }
     .badge { padding:4px 10px; border-radius:20px; font-size:13px; font-weight:600; color:#fff; display:inline-block; }
     .footer { padding:15px 30px; font-size:12px; color:#999; background:#fafafa; }
-    .keterangan { font-size:13px; color:#666; margin-top:20px; line-height:1.6; }
+    .notes { font-size:13px; color:#666; margin-top:20px; line-height:1.6; }
 </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>Laporan Kesehatan Sistem</h1>
-        <p>Dibuat pada: $TANGGAL_TAMPIL</p>
-        <p>Status Keseluruhan: $(label_status "$KESIMPULAN")</p>
+        <h1>System Health Report</h1>
+        <p>Generated on: $DATE_DISPLAY</p>
+        <p>Overall Status: $(status_label "$SUMMARY")</p>
     </div>
     <div class="content">
         <table>
-            <tr><th>Komponen</th><th>Detail</th><th>Status</th></tr>
+            <tr><th>Component</th><th>Details</th><th>Status</th></tr>
             <tr>
-                <td>Penggunaan Processor (CPU)</td>
-                <td>${CPU_USAGE}% terpakai</td>
-                <td><span class="badge" style="background:$(warna_status "$STATUS_CPU")">$(label_status "$STATUS_CPU")</span></td>
+                <td>Processor Usage (CPU)</td>
+                <td>${CPU_USAGE}% used</td>
+                <td><span class="badge" style="background:$(status_color "$STATUS_CPU")">$(status_label "$STATUS_CPU")</span></td>
             </tr>
             <tr>
-                <td>Penggunaan Memori (RAM)</td>
-                <td>${RAM_USED} MB dari ${RAM_TOTAL} MB (${RAM_PERSEN}%)</td>
-                <td><span class="badge" style="background:$(warna_status "$STATUS_RAM")">$(label_status "$STATUS_RAM")</span></td>
+                <td>Memory Usage (RAM)</td>
+                <td>${RAM_USED} MB of ${RAM_TOTAL} MB (${RAM_PERCENT}%)</td>
+                <td><span class="badge" style="background:$(status_color "$STATUS_RAM")">$(status_label "$STATUS_RAM")</span></td>
             </tr>
             <tr>
-                <td>Penggunaan Penyimpanan (Disk)</td>
-                <td>${DISK_USED} dari ${DISK_TOTAL} (${DISK_PERSEN}%)</td>
-                <td><span class="badge" style="background:$(warna_status "$STATUS_DISK")">$(label_status "$STATUS_DISK")</span></td>
+                <td>Storage Usage (Disk)</td>
+                <td>${DISK_USED} of ${DISK_TOTAL} (${DISK_PERCENT}%)</td>
+                <td><span class="badge" style="background:$(status_color "$STATUS_DISK")">$(status_label "$STATUS_DISK")</span></td>
             </tr>
             <tr>
-                <td>Lama Sistem Menyala</td>
+                <td>System Uptime</td>
                 <td>$UPTIME_TEXT</td>
                 <td>—</td>
             </tr>
             <tr>
-                <td>Percobaan Login Gagal</td>
-                <td>$LOGIN_GAGAL kali</td>
-                <td><span class="badge" style="background:$(warna_status "$STATUS_LOGIN")">$(label_status "$STATUS_LOGIN")</span></td>
+                <td>Failed Login Attempts</td>
+                <td>$FAILED_LOGINS</td>
+                <td><span class="badge" style="background:$(status_color "$STATUS_LOGIN")">$(status_label "$STATUS_LOGIN")</span></td>
             </tr>
         </table>
 
-        <div class="keterangan">
-            <b>Keterangan:</b><br>
-            ✅ <b>Sehat</b> = Semua berjalan normal, tidak perlu tindakan.<br>
-            ⚠️ <b>Perlu Perhatian</b> = Sebaiknya mulai dipantau, belum darurat.<br>
-            ❌ <b>Bermasalah</b> = Perlu tindakan / dihubungi tim IT sesegera mungkin.
+        <div class="notes">
+            <b>Legend:</b><br>
+            ✅ <b>Healthy</b> = Everything is normal, no action needed.<br>
+            ⚠️ <b>Needs Attention</b> = Should start being monitored, not urgent yet.<br>
+            ❌ <b>Problem</b> = Action needed / contact IT team as soon as possible.
         </div>
     </div>
     <div class="footer">
-        Laporan dibuat otomatis oleh Linux System Health Check &mdash; tidak memerlukan tindakan manual.
+        Report generated automatically by Linux System Health Check &mdash; no manual action required.
     </div>
 </div>
 </body>
@@ -201,8 +201,8 @@ EOF
 
 echo ""
 echo "=========================================="
-echo " Pengecekan selesai!"
-echo " Status keseluruhan sistem: $KESIMPULAN"
-echo " Laporan tersimpan di: $FILE_LAPORAN"
+echo " Check complete!"
+echo " Overall system status: $SUMMARY"
+echo " Report saved to: $REPORT_FILE"
 echo "=========================================="
 echo ""
