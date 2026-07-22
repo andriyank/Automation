@@ -32,7 +32,7 @@ Go to the repo page
 Click the green < > Code button → "Download ZIP"
 Extract the ZIP, then open the windows-health-check folder
 
-To download just this folder (not the whole repo), go to download-directory.github.io, paste this link: https://github.com/andriyank/Automation/tree/main/windows-health-check, then press Enter.
+To download just this folder (not the whole repo), go to https://download-directory.github.io, paste this link: https://github.com/andriyank/Automation/tree/main/windows-health-check, then press Enter.
 
 ### 1. Open the `windows-health-check` folder
 
