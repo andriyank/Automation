@@ -26,7 +26,7 @@ The report shows status using simple colors and emojis:
 
 ### 1. Download / Clone this project
 ```bash
-git clone https://github.com/USERNAME/linux-health-check.git
+git clone https://github.com/andriyank/linux-health-check.git
 cd linux-health-check
 ```
 
