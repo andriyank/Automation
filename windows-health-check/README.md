@@ -12,6 +12,12 @@ The report is a web page (HTML) that's easy for anyone to read, including non-te
 
 ---
 
+## 📸 Example Report
+
+![Windows System Health Report](images/windows-system-health-report.png)
+
+---
+
 ## 📋 What Gets Checked?
 
 1. **CPU** — processor load
@@ -32,7 +38,7 @@ No terminal or Git knowledge needed:
 2. Click the green **`< > Code`** button → **"Download ZIP"**
 3. Extract the ZIP, then open the `windows-health-check` folder
 
-> To download just this folder (not the whole repo), go to **[download-directory.github.io](https://download-directory.github.io)**, paste this link: `https://github.com/andriyank/Automation/tree/main/windows-health-check`, then press Enter.
+> To download just this folder (not the whole repo), go to **[download-directory.github.io](https://download-directory.github.io)**, paste this link: https://github.com/andriyank/Automation/tree/main/windows-health-check, then press Enter.
 
 ### 1. Open the `windows-health-check` folder
 
@@ -86,6 +92,7 @@ The report will automatically **open in your browser**, and will also be saved i
 windows-health-check/
 ├── health_check.ps1      # Main health check script
 ├── setup_otomatis.ps1    # Schedules the daily automatic check
+├── images/                # Example screenshots used in this README
 ├── reports/               # Where all HTML reports are stored
 └── README.md              # This file
 ```
